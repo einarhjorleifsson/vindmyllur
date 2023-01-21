@@ -1,5 +1,5 @@
-# run as: nohup R < rscripts/01_viewshed-sf.R --vanilla > viewshed-sf.log &
-source("R/create_viewshed.R")
+library(sf)
+library(tidyverse)
 d <-
   readxl::read_excel("data-raw/Natturukortid_gagnagrunnur_fyrir_vefsja.xlsx") |>
   janitor::clean_names() |>
@@ -16,16 +16,26 @@ fn <-
   stringr::str_replace("^t-", "t") |>
   stringr::str_replace("-t-", "-t")
 
-r <- terra::rast("data-raw/LMI_DEM.tif")
-for(i in 1:nrow(d)) {
+fil <- paste0("data/", dir("data", pattern = ".gpkg"))
+
+for(i in 1:length(fil)) {
   print(i)
-  create_viewshed(d$lon[i], d$lat[i], r = r) |>
-    dplyr::mutate(virkjun = d$virkjun[i],
-                  vn = fn[i]) |>
-    sf::st_write(paste0("data/",
+  sf::read_sf(fil[i]) |>
+    select(-viewshed) |>
+    st_cast("POLYGON") |>
+    mutate(area = as.numeric(st_area(geom))) |>
+    select(virkjun, area, vn) |>
+    arrange(desc(area)) |>
+    filter(area >= 10 * 1e6) |>
+    st_simplify(dTolerance = 7) |>
+    sf::st_write(paste0("data/simplified/",
                         stringr::str_pad(i, width = 2, pad = "0"),
                         "_viewshed-sf_",
                         fn[i],
                         ".gpkg"),
                  delete_layer = TRUE)
 }
+
+
+
+

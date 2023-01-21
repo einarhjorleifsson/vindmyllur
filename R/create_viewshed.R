@@ -32,7 +32,7 @@ create_viewshed <- function(lon, lat, r, dx = 90, observer = 180, target = 1.5, 
 
   # crop the raster
   xy <- pt |> sf::st_coordinates()
-  dx <- dx * 1.1
+  dx <- dx * 1.02
   e <- terra::ext(xy[[1]] - dx, # xmin
                   xy[[1]] + dx, # xmax
                   xy[[2]] - dx, # ymin
