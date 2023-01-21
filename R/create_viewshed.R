@@ -54,7 +54,7 @@ create_viewshed <- function(lon, lat, r, dx = 90, observer = 180, target = 1.5, 
       sf::st_as_sf()  |>
       dplyr::filter(viewshed == 1) |>
       sf::st_make_valid()  |>
-      sf::st_simplify(dTolerance = dTolerance) |>
+      # sf::st_simplify(dTolerance = dTolerance) |>
       sf::st_intersection(buffer)
     return(po)
   }
